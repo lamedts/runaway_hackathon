@@ -3,6 +3,11 @@ import os
 from clarifai.rest import ClarifaiApp
 from clarifai.rest import Image as ClImage
 
+from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
+db = client['laters']
+
+
 PREFIX_PATH = './img'
 APP = ClarifaiApp(api_key='cd507789e04b4566938bd00424f8fda5')
 
@@ -116,20 +121,21 @@ def search (filename='./img/140149599.jpg'):
 
     return ary
 
-def test ():
+def searchAndUpload ():
     for path, dirs, files in os.walk(PREFIX_PATH):
         for filename in files:
             fio = open(os.path.join(path, filename), 'rb')
             abc = APP.inputs.search_by_image(fileobj=fio)
-
-            text_file = open(filename + ".txt", "w")
+            
+            ary = []
+            searchResAry = []
             for item in abc:
-                print(item.metadata)
-                print(item.score)
-                text_file.write(str(item.metadata))
-                text_file.write(str(item.score))
-                text_file.write('\n')
-            text_file.close()
+                obj = {}
+                obj['other_id'] = item.input_id
+                obj['score'] = item.score
+                ary.append(obj)
+                searchResAry.append(item.input_id.replace(".jpg", ""))
+            result = db.img_match.insert_one({'id':int(filename.replace(".jpg", "")), "match": ary, "searchResult":searchResAry})
 
 def delAll():
     APP.inputs.delete_all()
