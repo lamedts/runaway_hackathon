@@ -56,6 +56,7 @@ def imgExtractor ():
 def bulkInsert(start, end, path, filesAry):
     apparel_Model = APP.models.get('apparel')
     imgAry = []
+    print(filesAry)
     try:
         for filename in filesAry[start:end]:
             obj = open(os.path.join(path, filename), "rb")
@@ -85,10 +86,11 @@ def bulkInput():
     filesAry = []
     path = ''
 
-    for path, dirs, files in os.walk(PREFIX_PATH):
+    for path, dirs, files in os.walk('./img'):
         filesAry = files
         path = path
 
+    
     bulkInsert(0, 60, path, filesAry)
     # bulkInsert(100, 200, path, filesAry)
     # bulkInsert(200, 300, path, filesAry)
@@ -122,7 +124,7 @@ def search (filename='./img/140149599.jpg'):
     return ary
 
 def searchAndUpload ():
-    for path, dirs, files in os.walk(PREFIX_PATH):
+    for path, dirs, files in os.walk('./test'):
         for filename in files:
             fio = open(os.path.join(path, filename), 'rb')
             abc = APP.inputs.search_by_image(fileobj=fio)
@@ -134,12 +136,65 @@ def searchAndUpload ():
                 obj['other_id'] = item.input_id
                 obj['score'] = item.score
                 ary.append(obj)
-                searchResAry.append(item.input_id.replace(".jpg", ""))
-            result = db.img_match.insert_one({'id':int(filename.replace(".jpg", "")), "match": ary, "searchResult":searchResAry})
+                searchResAry.append(int(item.input_id.replace(".jpg", "")))
+            img_searchResAry = {'id':int(filename.replace(".jpg", "")), "match": ary, "searchResult":searchResAry}
+            result = db.test_final.update_one(
+                {"Unique_No": int(filename.replace(".jpg", ""))},
+                {
+                    "$set": {
+                        "searchResult2":searchResAry
+                    }
+                }
+            )
+            print("e")
+
+    # cursor = db.test_final.update_one(
+    #     {"Unique_No": 140168573},
+    #     {
+    #         "$set": {
+    #             "abc":[1,1,1]
+    #         }
+    #     }
+    # )
+    # print(cursor)
 
 def delAll():
     APP.inputs.delete_all()
 
+def uploadTrain():
+    apparel_Model = APP.models.get('apparel')
+    imgAry = []
+    import mongo
+    data = mongo.getTrain()
+    print(len(data))
+    for item in data[401:]:
+        #print(item['Unique_No'])
+        try:
+            obj = open('./img/'+ str(item['Unique_No']) + '.jpg', "rb")
+            # print(obj)
+            conceptObj = apparel_Model.predict([ClImage(file_obj=obj)])
+            mainConcept = ''
+            for key in conceptObj['outputs'][0]['data']['concepts']:
+                mainConcept = key['name']
+                break
+
+            imgAry.append(
+                ClImage(
+                    file_obj=obj,
+                    image_id=str(item['Unique_No']) + '.jpg',
+                    concepts=[mainConcept],
+                    metadata={'key':mainConcept}
+                )
+            )
+        except Exception as e:
+            print(e)
+            pass
+        #print(imgAry[:10])
+    APP.inputs.bulk_create_images(imgAry)
+
 # bulkInput()
 # search()
 # delAll()
+# uploadTrain()
+
+# searchAndUpload()

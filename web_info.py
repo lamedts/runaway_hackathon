@@ -7,7 +7,7 @@ def similar(a, b):
 
 def basicFilter(test, train):
     for index, row in test.iterrows():
-        newdata = test[test['Unique.No'] == row['Unique.No']].iloc[0]
+        newdata = test[test['Unique_No'] == row['Unique_No']].iloc[0]
         result = train[train['TypeProduct_Desc'] == newdata['TypeProduct_Desc']]
         result = result[result['Retail_Class_Desc'] == newdata['Retail_Class_Desc']]
         result = result[result['Retail_SubClass_Desc'] == newdata['Retail_SubClass_Desc']]
@@ -21,10 +21,10 @@ def basicFilter(test, train):
             result.drop('{}_score'.format(col), axis = 1, inplace = True)
         result['scores'] = result['scores'].map(lambda x: x/5)
         result = result.sort_values('scores', ascending = False)
-        if len(result['Unique.No'])<0:
-            test.loc[index, 'searchResult'] = str(result['Unique.No'].tolist())[1:-1]
+        if len(result['Unique_No'])<0:
+            test.loc[index, 'searchResult'] = str(result['Unique_No'].tolist())[1:-1]
         else:
-            test.loc[index, 'searchResult'] = str(result['Unique.No'][:10].tolist())[1:-1]
+            test.loc[index, 'searchResult'] = str(result['Unique_No'][:20].tolist())[1:-1]
     return test
 
 train_data = pd.read_json('train_data.json')
