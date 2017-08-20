@@ -8,6 +8,7 @@ import img
 import mongo
 import info
 import plot
+from pprint import pprint
 
 app = Flask(__name__, static_url_path='/img')
 
@@ -27,7 +28,7 @@ def chart():
         pass
     # print(request.json)
     request_obj = request.json
-    print(request_obj)
+    # print(request.json)
     # print(request_obj.list)
     return plot.get_chart(request_obj)
     # return  json.dumps(request.json)
