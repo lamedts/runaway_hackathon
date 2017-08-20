@@ -9,9 +9,11 @@ import json
 test_result = pd.read_json(json.dumps(mongo.getTest()))
 train_data = pd.read_json(json.dumps(mongo.getTrain()))
 
-plotly.tools.set_credentials_file(username='qfnreneeleung', api_key='IHR5ewSbmpkeCJiWkkvu')
+plotly.tools.set_credentials_file(username='reneeleung17', api_key='s2potv4Hm4z1O5yIqWSq')
 
 def get_chart(vendorlist):
+    print("!!!", vendorlist)
+    print("!!!", type(vendorlist))
     vendorlist =vendorlist[1:-1].replace('"', "").split(',')
     # print("!!!!!!!!!!!!!!!!!!", vendorlist)
     report_data = pd.DataFrame()
